@@ -107,7 +107,8 @@ public class PlayerCam : MonoBehaviour
         //update the player
         PlayerScript.shiftControls(orientations[state][2], orientations[state][3]);
 
-        //actually do all the rotation
+        //actually do all the rotation, and also have the player do it
+        StartCoroutine(PlayerScript.performRotation(turn_direction));
         float time = 0f;
         while (time < 1f)
         {

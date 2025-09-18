@@ -34,7 +34,7 @@ public class PlayerScript : MonoBehaviour
 
     //graphic stuff
     private Animator anim;
-    private SpriteRenderer sr;
+    private static GameObject player_sprite;
 
     //character mechanics
     private float health;
@@ -77,7 +77,7 @@ public class PlayerScript : MonoBehaviour
 
         //graphics
         anim = GetComponent<Animator>();
-        sr = GetComponent<SpriteRenderer>();
+        player_sprite = transform.Find("PlayerSprite").gameObject;
 
         //character mechanics
         health = 100f;
@@ -244,6 +244,27 @@ public class PlayerScript : MonoBehaviour
         swapped = !swapped;
         inv_x = x;
         inv_y = y;
+    }
+
+    //performs the turn with the camera 
+    public static IEnumerator performRotation(float turn_direction)
+    {
+        //get the values for the rotation
+        float start = player_sprite.transform.localRotation.eulerAngles.y;
+        float goal_rotation = player_sprite.transform.localRotation.eulerAngles.y + (90 * turn_direction) + (360 * 3); //do 3 spins on it holy woah
+
+        //actually do all the rotation
+        float time = 0f;
+        while (time < 1f)
+        {
+            Vector3 pos_rotate = new Vector3(15f, Mathf.Lerp(start, goal_rotation, time), 0);
+
+            player_sprite.transform.SetLocalPositionAndRotation(player_sprite.transform.localPosition, Quaternion.Euler(pos_rotate));
+
+            time += Time.deltaTime * 2f;
+
+            yield return null;
+        }
     }
 
 }

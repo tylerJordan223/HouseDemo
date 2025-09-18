@@ -12,12 +12,11 @@ public class PlayerCam : MonoBehaviour
     //IMPORTANT NOTE//
     //idk why but in order for the rotation to work properly the Q needs a -90 value when looping back to 0
 
-
     //actual camera
     public CinemachineVirtualCamera cam;
 
     //assisting values to send to the player
-    public float horizontal;
+    public float swapped; // 0 = no, 1 = yes
     public float inverted;
     public float turn_direction;
 
@@ -31,20 +30,22 @@ public class PlayerCam : MonoBehaviour
     //list of all the camera orientations in order:
     // [0] = X position
     // [1] = Z position
-    // [2] = Y rotation
+    // [2] = x invert
+    // [3] = y invert
     private int state;
     private static List<float[]> orientations = new List<float[]>
     {
-        new float[3] {0,-6, 0},
-        new float[3] { -6,0,90},
-        new float[3] { 0,6,180},
-        new float[3] { 6,0,270}
+        new float[4] {0,-6, 1, 1},
+        new float[4] { -6,0, -1, 1},
+        new float[4] { 0,6, -1, -1},
+        new float[4] { 6,0, 1, -1}
     };
 
 
     private void Start()
     {
-        horizontal = 1;
+
+        swapped = 0;
         inverted = 1;
         state = 0;
         rotating = false;
@@ -54,11 +55,11 @@ public class PlayerCam : MonoBehaviour
     {
 
         //rotation states
-        if(Input.GetKeyDown(KeyCode.E) && !rotating)
+        if (Input.GetKeyDown(KeyCode.E) && !rotating)
         {
-            if(state == 0)
+            if (state == 0)
             {
-                state = orientations.Count-1;
+                state = orientations.Count - 1;
                 cam.transform.SetLocalPositionAndRotation(cam.transform.localPosition, Quaternion.Euler(new Vector3(cam.transform.localRotation.eulerAngles.x, E_rotation, cam.transform.localRotation.eulerAngles.z)));
             }
             else
@@ -72,7 +73,7 @@ public class PlayerCam : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Q) && !rotating)
         {
-            if (state == orientations.Count-1)
+            if (state == orientations.Count - 1)
             {
                 state = 0;
                 cam.transform.SetLocalPositionAndRotation(cam.transform.localPosition, Quaternion.Euler(new Vector3(cam.transform.localRotation.eulerAngles.x, Q_rotation, cam.transform.localRotation.eulerAngles.z)));
@@ -86,29 +87,32 @@ public class PlayerCam : MonoBehaviour
             StartCoroutine(RotateCamera());
         }
 
-        Debug.Log(cam.transform.rotation.y);
     }
 
     //lerp should be start/end and then the percentage between them 
 
     IEnumerator RotateCamera()
     {
+        //stop the player from moving
+        PlayerScript.stopPlayer();
         //can't rotate again
         rotating = true;
 
         //get the current camera orientation
         float[] start = {cam.transform.localPosition.x, cam.transform.localPosition.z, cam.transform.localRotation.eulerAngles.y};
     
+        //math out the rotation
+        float goal_rotation = cam.transform.localRotation.eulerAngles.y + (90 * turn_direction);
 
-        //get the state
-        float[] goal = orientations[state];
-        goal[2] = start[2] + (90 * turn_direction);
+        //update the player
+        PlayerScript.shiftControls(orientations[state][2], orientations[state][3]);
 
+        //actually do all the rotation
         float time = 0f;
         while (time < 1f)
         {
-            Vector3 pos_move = new Vector3(Mathf.Lerp(start[0], goal[0], time), cam.transform.localPosition.y, Mathf.Lerp(start[1], goal[1], time));
-            Vector3 pos_rotate = new Vector3(15f, Mathf.Lerp(start[2], goal[2], time), 0);
+            Vector3 pos_move = new Vector3(Mathf.Lerp(start[0], orientations[state][0], time), cam.transform.localPosition.y, Mathf.Lerp(start[1], orientations[state][1], time));
+            Vector3 pos_rotate = new Vector3(15f, Mathf.Lerp(start[2], goal_rotation, time), 0);
 
             cam.transform.SetLocalPositionAndRotation(pos_move, Quaternion.Euler(pos_rotate));
 
@@ -116,9 +120,9 @@ public class PlayerCam : MonoBehaviour
 
             yield return null;
         }
-        Debug.Log(start[0] + " " + start[1] + " " + start[2]);
-        Debug.Log(goal[0] + " " + goal[1] + " " + goal[2]);
 
+        //restart the player and end the loop
+        PlayerScript.startPlayer();
         rotating = false;
     }
 

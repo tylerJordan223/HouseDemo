@@ -1,9 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using static UnityEditor.Progress;
 
 /*
 
@@ -20,10 +22,15 @@ using UnityEngine.UI;
 
 public class PlayerScript : MonoBehaviour
 {
+    //single instance of player initialization
+    #region initialization
+    private static GameObject player_instance;
+    #endregion
+
     //all variables for the parts of the model
     private Transform trans;
     private Rigidbody rb;
-    private BoxCollider collider;
+    private BoxCollider col;
 
     //graphic stuff
     private Animator anim;
@@ -40,20 +47,33 @@ public class PlayerScript : MonoBehaviour
     public List<GameObject> itemList = new List<GameObject>();
 
     //flags
-    public bool canControl;
+    public static bool canControl;
     public bool holdingItem;
     public bool _jumping;
 
     //movement
+    public static bool swapped;
+    public static float inv_x;
+    public static float inv_y;
     public Vector3 inputVector;
     public Vector3 lastInputVector;
 
     private void Start()
     {
+        //making sure theres one player
+        if (player_instance != null && player_instance != this.gameObject)
+        {
+            Destroy(this.gameObject);
+        }
+        else
+        {
+            player_instance = this.gameObject;
+        }
+
         //object variables
         trans = GetComponent<Transform>();
         rb = GetComponent<Rigidbody>();
-        collider = GetComponent<BoxCollider>();
+        col = GetComponent<BoxCollider>();
 
         //graphics
         anim = GetComponent<Animator>();
@@ -72,6 +92,9 @@ public class PlayerScript : MonoBehaviour
         canControl = true;
         holdingItem = false;
         _jumping = false;
+        swapped = false;
+        inv_x = 1;
+        inv_y = 1;
     }
 
     //use for anything non-movement related like math
@@ -79,8 +102,15 @@ public class PlayerScript : MonoBehaviour
     {
         if(canControl)
         {
-            //update input
-            inputVector = new Vector3(Input.GetAxisRaw("Horizontal"), 0f, Input.GetAxisRaw("Vertical"));
+            //update input, swaps them based on camera
+            if(!swapped)
+            {
+                inputVector = new Vector3(Input.GetAxisRaw("Horizontal") * inv_x, 0f, Input.GetAxisRaw("Vertical") * inv_y);
+            }
+            else
+            {
+                inputVector = new Vector3(Input.GetAxisRaw("Vertical") * inv_y, 0f, Input.GetAxisRaw("Horizontal") * inv_x);
+            }
 
             //update last input if actual input and not 0
             // CURRENTLY SET UP FOR 4 DIRECTIONAL, IF HORIZONTAL THEN USE THAT
@@ -103,7 +133,7 @@ public class PlayerScript : MonoBehaviour
                     //Setting object's parent to current room
                     heldObject.transform.SetParent(currentRoom.transform.Find("Items").transform, true);
                     heldObject.transform.localScale = Vector3.one;
-                    heldObject.transform.position = new Vector3(heldObject.transform.position.x, heldObject.transform.position.y - (collider.bounds.size.y / 2), heldObject.transform.position.z);
+                    heldObject.transform.position = new Vector3(heldObject.transform.position.x, heldObject.transform.position.y - (col.bounds.size.y / 2), heldObject.transform.position.z);
                     heldObject = null;
                     holdingItem = false;
                 }
@@ -119,6 +149,10 @@ public class PlayerScript : MonoBehaviour
                     holdingItem = true;
                 }
             }
+        }
+        else
+        {
+            inputVector = new Vector3(0f, 0f, 0f);
         }
 
         //kill when out of hp
@@ -191,6 +225,25 @@ public class PlayerScript : MonoBehaviour
                 }
             }
         }
+    }
+
+    //stop the player
+    public static void stopPlayer()
+    {
+        canControl = false;
+    }
+
+    public static void startPlayer()
+    {
+        canControl = true;
+    }
+
+    //orientation shifting
+    public static void shiftControls(float x, float y)
+    {
+        swapped = !swapped;
+        inv_x = x;
+        inv_y = y;
     }
 
 }

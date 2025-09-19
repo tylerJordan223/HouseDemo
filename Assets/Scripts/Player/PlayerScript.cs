@@ -257,7 +257,7 @@ public class PlayerScript : MonoBehaviour
         float time = 0f;
         while (time < 1f)
         {
-            Vector3 pos_rotate = new Vector3(15f, Mathf.Lerp(start, goal_rotation, time), 0);
+            Vector3 pos_rotate = new Vector3(0f, Mathf.Lerp(start, goal_rotation, time), 0);
 
             player_sprite.transform.SetLocalPositionAndRotation(player_sprite.transform.localPosition, Quaternion.Euler(pos_rotate));
 
@@ -265,6 +265,9 @@ public class PlayerScript : MonoBehaviour
 
             yield return null;
         }
+
+        //set the final rotation
+        player_sprite.transform.SetLocalPositionAndRotation(player_sprite.transform.localPosition, Quaternion.Euler(0f, goal_rotation, 0f));
     }
 
 }

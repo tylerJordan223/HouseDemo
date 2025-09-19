@@ -122,6 +122,8 @@ public class PlayerCam : MonoBehaviour
             yield return null;
         }
 
+        cam.transform.SetLocalPositionAndRotation(new Vector3(orientations[state][0], cam.transform.localPosition.y, orientations[state][1]), Quaternion.Euler(15f, goal_rotation, 0f));
+
         //restart the player and end the loop
         PlayerScript.startPlayer();
         rotating = false;

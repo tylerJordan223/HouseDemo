@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.IO.Pipes;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -48,6 +49,7 @@ public class PlayerScript : MonoBehaviour
 
     //flags
     public static bool canControl;
+    public static bool canJump;
     public bool holdingItem;
     public bool _jumping;
 
@@ -56,7 +58,11 @@ public class PlayerScript : MonoBehaviour
     public static float inv_x;
     public static float inv_y;
     public Vector3 inputVector;
-    public Vector3 lastInputVector;
+    public static Vector3 lastInputVector;
+
+    //other public variables
+    public static Transform player_trans;
+    public static Transform held_object_trans;
 
     private void Start()
     {
@@ -68,6 +74,9 @@ public class PlayerScript : MonoBehaviour
         else
         {
             player_instance = this.gameObject;
+            player_trans = this.transform;
+            held_object_trans = this.transform.Find("HeldObject");
+            Debug.Log(held_object_trans.name);
         }
 
         //object variables
@@ -93,6 +102,7 @@ public class PlayerScript : MonoBehaviour
         holdingItem = false;
         _jumping = false;
         swapped = false;
+        canJump = true;
         inv_x = 1;
         inv_y = 1;
     }
@@ -117,12 +127,6 @@ public class PlayerScript : MonoBehaviour
             if ( (inputVector.x != 0 || inputVector.z != 0) && (inputVector.x == 0 || inputVector.z == 0) )
             {
                 lastInputVector = inputVector;
-            }
-
-            //set the jump
-            if(Input.GetKeyDown(KeyCode.Space) && !_jumping)
-            {
-                _jumping = true;
             }
 
             //place/pickup item
@@ -181,7 +185,7 @@ public class PlayerScript : MonoBehaviour
             rb.velocity = new Vector3(inputVector.x * playerSpeed, rb.velocity.y, inputVector.z * playerSpeed);
 
             //handling the jump
-            if(Input.GetKey(KeyCode.Space) && !_jumping && rb.velocity.y <= 0)
+            if(Input.GetKey(KeyCode.Space) && !_jumping && rb.velocity.y <= 0 && canJump)
             {
                 rb.velocity = new Vector3(rb.velocity.x, jumpHeight, rb.velocity.z);
                 _jumping = true;

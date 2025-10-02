@@ -22,6 +22,7 @@ public class Pickupable : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         isHeld = false;
         onPlayer = false;
+        player_collider = GameObject.Find("Player").GetComponent<Collider>();
     }
 
     private void Update()
@@ -34,7 +35,11 @@ public class Pickupable : MonoBehaviour
             isHeld = false;
             PlayerScript.canJump = true;
 
-            rb.AddForce(PlayerScript.lastInputVector * 50f, ForceMode.Impulse);
+            //only throw if moving
+            if(PlayerScript.inputVector != new Vector3(0f,0f,0f))
+            {
+               rb.AddForce(PlayerScript.lastInputVector * 100f, ForceMode.Impulse);
+            }
         }
 
         if (onPlayer && !isHeld && Input.GetKeyDown(KeyCode.F))
@@ -49,6 +54,10 @@ public class Pickupable : MonoBehaviour
             StartCoroutine(PickedUp());
         }
 
+        if(!onPlayer && !isHeld && Physics.GetIgnoreCollision(phys_collider, player_collider))
+        {
+            Physics.IgnoreCollision(phys_collider, player_collider, false);
+        }
     }
 
     public IEnumerator PickedUp()
@@ -88,9 +97,9 @@ public class Pickupable : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            player_collider = other;
             onPlayer = true;
         }
+        
     }
 
     private void OnTriggerExit(Collider other)
@@ -98,11 +107,6 @@ public class Pickupable : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             onPlayer = false;
-
-            if(!isHeld)
-            {
-                Physics.IgnoreCollision(phys_collider, other, false);
-            }
         }
     }
 }

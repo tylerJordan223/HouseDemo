@@ -445,7 +445,6 @@ MonoBehaviour:
   itemList: []
   holdingItem: 0
   _jumping: 0
-  inputVector: {x: 0, y: 0, z: 0}
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
@@ -821,8 +820,8 @@ Transform:
   m_GameObject: {fileID: 1302853124}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 2.0111, y: -0.3161, z: 1.4257}
-  m_LocalScale: {x: 10, y: 1, z: 10}
+  m_LocalPosition: {x: 2.8956, y: -0.3161, z: 0.8738}
+  m_LocalScale: {x: 30.170835, y: 1, z: 23.702385}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2068927595}
@@ -1063,7 +1062,7 @@ MeshCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2068927594}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: dd4a5d97f8c09354890efcb70ff18187, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0

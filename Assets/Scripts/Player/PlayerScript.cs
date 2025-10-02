@@ -25,7 +25,7 @@ public class PlayerScript : MonoBehaviour
 {
     //single instance of player initialization
     #region initialization
-    private static GameObject player_instance;
+    public static GameObject player_instance;
     #endregion
 
     //all variables for the parts of the model
@@ -57,7 +57,7 @@ public class PlayerScript : MonoBehaviour
     public static bool swapped;
     public static float inv_x;
     public static float inv_y;
-    public Vector3 inputVector;
+    public static Vector3 inputVector;
     public static Vector3 lastInputVector;
 
     //other public variables
@@ -91,7 +91,7 @@ public class PlayerScript : MonoBehaviour
         //character mechanics
         health = 100f;
         playerSpeed = 5f;
-        jumpHeight = 10f;
+        jumpHeight = 5f;
 
         //saved objects
         heldObject = null;

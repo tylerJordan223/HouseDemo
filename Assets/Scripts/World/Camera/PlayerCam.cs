@@ -2,8 +2,10 @@ using Cinemachine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
+using UnityEngine.TextCore.Text;
 
 public class PlayerCam : MonoBehaviour
 {
@@ -90,63 +92,70 @@ public class PlayerCam : MonoBehaviour
             StartCoroutine(RotateCamera());
         }
 
+        #region raycast-for-wall-fade
+
         //raycast for wall
-        RaycastHit[] walls;
+        RaycastHit[] walls = new RaycastHit[10];
         //actually performing the raycast towards the player
-        walls = Physics.RaycastAll(transform.position, (PlayerScript.player_trans.position - transform.position).normalized, 1000f);
-        
+        Physics.RaycastNonAlloc(new Ray(transform.position, (PlayerScript.player_trans.position - transform.position).normalized), walls);
+
+        //sort the list based on distance
+        var sorted_walls = walls.OrderByDescending(ch => ch.distance).ToList();
+        sorted_walls.Reverse();
+
         //if it hits anything
-        if(walls.Length > 0)
+        if (sorted_walls.Count > 0)
         {
             //go through all the hits
-            for(int i = 0; i < walls.Length; i++)
+            for(int i = 0; i < sorted_walls.Count; i++)
             {
-                Debug.Log(walls[i].transform.name);
-
-                //if its a wall
-                if (walls[i].transform.CompareTag("Wall"))
+                //gets rid of empty space in array
+                if (sorted_walls[i].distance != 0)
                 {
-                    Debug.Log("did this");
-                    //for the first wall intersected
-                    if(currentWall == null)
+                    //if its a wall
+                    if (sorted_walls[i].transform.CompareTag("Wall"))
                     {
-                        currentWall = walls[i].transform.GetComponent<WallScript>();
-                        currentWall.fading = true;
-                    }
-
-                    //if it hits current wall and fading is false
-                    if(walls[i].transform.GetComponent<WallScript>() == currentWall && currentWall.fading == false)
-                    {
-                        currentWall.fading = true;
-                    }
-
-                    //if its a different wall
-                    if (!(walls[i].transform.GetComponent<WallScript>() == currentWall))
-                    {
-                        //swap the walls
-                        currentWall.fading = false;
-                        currentWall = walls[i].transform.GetComponent<WallScript>();
-                        currentWall.fading = true;
-                    }
-
-                    //end the loop since this was the first wall it found no matter the outcome
-                    i = walls.Length;
-                }
-                else if (walls[i].transform.CompareTag("Player")) //if it hits the player first then it needs to end early
-                {
-                    Debug.Log("did this player");
-
-                    //also if there was a current faded wall now unfade it
-                    if (currentWall != null)
-                    {
-                        if (currentWall.fading)
+                        //for the first wall intersected
+                        if(currentWall == null)
                         {
-                            currentWall.fading = false;
+                            currentWall = sorted_walls[i].transform.GetComponent<WallScript>();
+                            currentWall.fading = true;
                         }
+
+                        //if it hits current wall and fading is false
+                        if(sorted_walls[i].transform.GetComponent<WallScript>() == currentWall && currentWall.fading == false)
+                        {
+                            currentWall.fading = true;
+                        }
+
+                        //if its a different wall
+                        if (!(sorted_walls[i].transform.GetComponent<WallScript>() == currentWall))
+                        {
+                            //swap the walls
+                            currentWall.fading = false;
+                            currentWall = sorted_walls[i].transform.GetComponent<WallScript>();
+                            currentWall.fading = true;
+                        }
+
+                        //end the loop since this was the first wall it found no matter the outcome
+                        i = sorted_walls.Count;
                     }
-                    //end loop
-                    i = walls.Length;
+                    else if (sorted_walls[i].transform.CompareTag("Player")) //if it hits the player first then it needs to end early
+                    {
+
+                        //also if there was a current faded wall now unfade it
+                        if (currentWall != null)
+                        {
+                            if (currentWall.fading)
+                            {
+                                currentWall.fading = false;
+                            }
+                        }
+                        //end loop
+                        i = sorted_walls.Count;
+                    }
                 }
+
             }
         }
         else
@@ -154,6 +163,8 @@ public class PlayerCam : MonoBehaviour
             //if it hits no walls that means no wall needs to fade out
             currentWall.fading = false;
         }
+
+        #endregion raycast-for-wall-fade
 
     }
 

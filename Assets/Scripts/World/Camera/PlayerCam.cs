@@ -101,13 +101,22 @@ public class PlayerCam : MonoBehaviour
             //go through all the hits
             for(int i = 0; i < walls.Length; i++)
             {
+                Debug.Log(walls[i].transform.name);
+
                 //if its a wall
                 if (walls[i].transform.CompareTag("Wall"))
                 {
+                    Debug.Log("did this");
                     //for the first wall intersected
                     if(currentWall == null)
                     {
                         currentWall = walls[i].transform.GetComponent<WallScript>();
+                        currentWall.fading = true;
+                    }
+
+                    //if it hits current wall and fading is false
+                    if(walls[i].transform.GetComponent<WallScript>() == currentWall && currentWall.fading == false)
+                    {
                         currentWall.fading = true;
                     }
 
@@ -120,10 +129,30 @@ public class PlayerCam : MonoBehaviour
                         currentWall.fading = true;
                     }
 
-                    //break it no matter what, cause if it doesnt swap walls this means its the same wall
-                    break;
+                    //end the loop since this was the first wall it found no matter the outcome
+                    i = walls.Length;
+                }
+                else if (walls[i].transform.CompareTag("Player")) //if it hits the player first then it needs to end early
+                {
+                    Debug.Log("did this player");
+
+                    //also if there was a current faded wall now unfade it
+                    if (currentWall != null)
+                    {
+                        if (currentWall.fading)
+                        {
+                            currentWall.fading = false;
+                        }
+                    }
+                    //end loop
+                    i = walls.Length;
                 }
             }
+        }
+        else
+        {
+            //if it hits no walls that means no wall needs to fade out
+            currentWall.fading = false;
         }
 
     }

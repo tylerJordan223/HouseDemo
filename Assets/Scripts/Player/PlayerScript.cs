@@ -76,7 +76,6 @@ public class PlayerScript : MonoBehaviour
             player_instance = this.gameObject;
             player_trans = this.transform;
             held_object_trans = this.transform.Find("HeldObject");
-            Debug.Log(held_object_trans.name);
         }
 
         //object variables

@@ -27,6 +27,9 @@ public class PlayerCam : MonoBehaviour
     [SerializeField] public float E_rotation;
     [SerializeField] public float Q_rotation;
 
+    //handling the wall fading
+    private WallScript currentWall;
+
     //list of all the camera orientations in order:
     // [0] = X position
     // [1] = Z position
@@ -85,6 +88,42 @@ public class PlayerCam : MonoBehaviour
 
             turn_direction = 1;
             StartCoroutine(RotateCamera());
+        }
+
+        //raycast for wall
+        RaycastHit[] walls;
+        //actually performing the raycast towards the player
+        walls = Physics.RaycastAll(transform.position, (PlayerScript.player_trans.position - transform.position).normalized, 1000f);
+        
+        //if it hits anything
+        if(walls.Length > 0)
+        {
+            //go through all the hits
+            for(int i = 0; i < walls.Length; i++)
+            {
+                //if its a wall
+                if (walls[i].transform.CompareTag("Wall"))
+                {
+                    //for the first wall intersected
+                    if(currentWall == null)
+                    {
+                        currentWall = walls[i].transform.GetComponent<WallScript>();
+                        currentWall.fading = true;
+                    }
+
+                    //if its a different wall
+                    if (!(walls[i].transform.GetComponent<WallScript>() == currentWall))
+                    {
+                        //swap the walls
+                        currentWall.fading = false;
+                        currentWall = walls[i].transform.GetComponent<WallScript>();
+                        currentWall.fading = true;
+                    }
+
+                    //break it no matter what, cause if it doesnt swap walls this means its the same wall
+                    break;
+                }
+            }
         }
 
     }

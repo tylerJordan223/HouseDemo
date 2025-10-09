@@ -37,7 +37,7 @@ public class PileScript : MonoBehaviour
         animation_speed = 0.001f;
 
         //ignore collision with the player
-        Physics.IgnoreCollision(GetComponent<BoxCollider>(), GameObject.Find("Player").GetComponent<BoxCollider>(), true);
+        Physics.IgnoreCollision(GetComponent<BoxCollider>(), GameObject.Find("Collider").GetComponent<BoxCollider>(), true);
     }
 
     private void Update()

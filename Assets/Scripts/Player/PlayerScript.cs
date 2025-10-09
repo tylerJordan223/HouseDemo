@@ -59,6 +59,8 @@ public class PlayerScript : MonoBehaviour
     public static float inv_y;
     public static Vector3 inputVector;
     public static Vector3 lastInputVector;
+    [SerializeField] public float stair_force;
+    [SerializeField] public float stair_ray_length;
 
     //other public variables
     public static Transform player_trans;
@@ -177,6 +179,16 @@ public class PlayerScript : MonoBehaviour
         //normalize for the sake of diagonal not double speed
         inputVector.Normalize();
 
+        //handle stairs
+        if(onStairs() && inputVector != Vector3.zero)
+        {
+            rb.AddForce(Vector3.down * stair_force, ForceMode.Force);
+        }
+        else
+        {
+            rb.mass = 1f;
+        }
+
         //update on speed if alive, stop if else
         if(health > 0)
         {
@@ -273,4 +285,27 @@ public class PlayerScript : MonoBehaviour
         player_sprite.transform.SetLocalPositionAndRotation(player_sprite.transform.localPosition, Quaternion.Euler(0f, goal_rotation, 0f));
     }
 
+    //to check if on stairs
+    private bool onStairs()
+    {
+        //garunteed not to be if jumping
+        if(_jumping)
+        {
+            return false;
+        }
+
+        //do a raycast
+        RaycastHit hit;
+        if(Physics.Raycast(transform.position, Vector3.down, out hit, (player_sprite.GetComponent<MeshRenderer>().bounds.size.y) / 2 * stair_ray_length))
+        {
+            //if not perfectly straight vector
+            if(hit.normal != Vector3.up)
+            {
+                return true;
+            }
+        }
+
+        //otherwise false
+        return false;
+    }
 }

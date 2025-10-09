@@ -22,7 +22,7 @@ public class Pickupable : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         isHeld = false;
         onPlayer = false;
-        player_collider = GameObject.Find("Player").GetComponent<Collider>();
+        player_collider = GameObject.Find("Collider").GetComponent<Collider>();
     }
 
     private void Update()
